@@ -1,0 +1,35 @@
+name: Auto Reply Bot
+
+on:
+  issues:
+    types: [opened]
+  pull_request_target:
+    types: [opened]
+
+jobs:
+  welcome:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Auto Reply to Issues and PRs
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const issue = context.payload.issue || context.payload.pull_request;
+            if (!issue) return;
+
+            let message = `Olá! Obrigado por entrar em contato. Sou um bot de pronto atendimento personalizado.
+
+Por favor, forneça mais detalhes sobre sua solicitação para que eu possa ajudar melhor.`;
+
+            // Personalizado: você pode adicionar lógica aqui
+            if (issue.title.toLowerCase().includes('bug')) {
+              message += '\n\nParece ser um bug. Descreva os passos para reproduzir.';
+            }
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              body: message
+            });
